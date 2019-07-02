@@ -1,13 +1,8 @@
 #pragma once
-
 #include <iostream>
 #include <string>
-
 #include <Windows.h>
 #include <TlHelp32.h>
-
-
-// Better than using namespace std;
 
 using std::cout;
 using std::endl;
@@ -16,7 +11,8 @@ using std::string;
 // datatype for a module in memory (dll, regular exe) 
 struct module
 {
-	DWORD BaseAddress, Size;
+	DWORD_PTR BaseAddress;
+	DWORD Size;
 };
 
 class Memory
@@ -62,24 +58,24 @@ public:
 			if (!_wcsicmp(mEntry.szModule, wModuleName)) {
 				CloseHandle(hmodule);
 
-				TargetModule = { (DWORD)mEntry.hModule, mEntry.modBaseSize };
+				TargetModule = { (DWORD_PTR)mEntry.hModule, mEntry.modBaseSize };
 				return TargetModule;
 			}
 		} while (Module32Next(hmodule, &mEntry));
 
-		module mod = { (DWORD)false, (DWORD)false };
+		module mod = { (DWORD_PTR)false, (DWORD)false };
 		return mod;
 	}
 
 	// Basic WPM wrapper, easier to use.
 	template <typename var>
-	bool WriteMemory(DWORD Address, var Value) {
+	bool WriteMemory(DWORD_PTR Address, var Value) {
 		return WriteProcessMemory(TargetProcess, (LPVOID)Address, &Value, sizeof(var), 0);
 	}
 
 	// Basic RPM wrapper, easier to use.
 	template <typename var>
-	var ReadMemory(DWORD Address) {
+	var ReadMemory(DWORD_PTR Address) {
 		var value;
 		ReadProcessMemory(TargetProcess, (LPCVOID)Address, &value, sizeof(var), NULL);
 		return value;
@@ -96,7 +92,7 @@ public:
 	}
 
 	// for finding a signature/pattern in memory of another process
-	DWORD FindSignature(DWORD start, DWORD size, const char* sig, const char* mask)
+	DWORD_PTR FindSignature(DWORD_PTR start, DWORD size, const char* sig, const char* mask)
 	{
 		BYTE* data = new BYTE[size];
 		SIZE_T bytesRead;
