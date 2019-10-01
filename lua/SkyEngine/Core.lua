@@ -25,6 +25,9 @@ local function CastSpell(spellName, target)
         CastSpellByName("]] .. spellName .. [[", "]] .. target .. [[")
         secured = true
       ]])
+	  if secured then
+        print('Cast: ' .. spellName .. ' on ' .. target)        
+	  end
 	end
 	if StaticPopup1:IsVisible() then StaticPopup1:Hide() end	
 end
